@@ -41,6 +41,42 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
     
+    // when user touches screen...
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        // first touch
+        if let touch = touches.first {
+            
+            // gives location of where user touched the 2D screen
+            let touchLocation = touch.location(in: sceneView)
+            
+            // get 3D coordinates from the 2D coordinates from the user touching the screen
+            // only cnosiered if it is on an existing plane that was detected by the user
+            let results = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent)
+            
+
+            // if there was a hit test from above then this will happen
+            if let hitResult = results.first {
+                
+                let boxScene = SCNScene(named: "art.scnassets/bluebox.scn")!
+                
+                if let boxNode = boxScene.rootNode.childNode(withName: "bluebox", recursively: true) {
+                    
+                    // position of box node
+                    // I changed the y value to put the box on the plane rather than through it, it is half of the value of y on the blue box node
+                    boxNode.position = SCNVector3(
+                        x: hitResult.worldTransform.columns.3.x,
+                        y: hitResult.worldTransform.columns.3.y + 0.35,
+                        z: hitResult.worldTransform.columns.3.z)
+                    
+                    // add the box to the scene
+                    sceneView.scene.rootNode.addChildNode(boxNode)
+                }
+            }
+            
+        }
+    }
+    
     // called when a plane is detected (in my case horizontal from the code above)
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
